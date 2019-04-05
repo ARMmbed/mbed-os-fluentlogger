@@ -18,6 +18,7 @@
 #define FLUENT_LOGGER_MBED_H
 #include "mbed.h"
 #include "TCPSocket.h"
+#include "TLSSocket.h"
 #include "uMP.h"
 
 /** Fluent Logger for mbed
@@ -25,13 +26,21 @@
  */
 class FluentLogger {
 public:
-    /** Create a FluentLogger instance
+    /** Create a FluentLogger instance with TCP Socket
      *
      * @param host fluentd server hostname/ipaddress
      * @param port fluentd server port (default: 24224)
      * @param bufsize message buffer length (default: 128)
      */
     FluentLogger(NetworkInterface* aNetwork, const char *host, const int port = 24224, uint32_t bufsize = 128);
+
+    /** Create a FluentLogger instance with TLS socket
+     *
+     * @param host fluentd server hostname/ipaddress
+     * @param port fluentd server port (default: 24224)
+     * @param bufsize message buffer length (default: 128)
+     */
+    FluentLogger(NetworkInterface* aNetwork, const char* ssl_ca_pem, const char *host, const int port = 24224, uint32_t bufsize = 128);
 
     /** Open connection (automatically called on log)
      *
@@ -76,11 +85,13 @@ private:
     int send();
 
     NetworkInterface *_net;
-    TCPSocket *_sock;
+    Socket* _sock;
+    nsapi_error_t _rt;
+    bool _socket_is_tls;
     const char *_host;
     const int  _port;
     int        _timeout;
     uMP        *_mp;
 };
 
-#endif
+#endif // FLUENT_LOGGER_MBED_H
